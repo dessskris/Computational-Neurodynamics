@@ -19,7 +19,7 @@ def Connect2L(N0, N1):
   http://www.izhikevich.org/publications/spikes.htm
   """
 
-  F = 50/np.sqrt(N1)  # Scaling factor
+  F = 60/np.sqrt(N1)  # Scaling factor
   D = 5               # Conduction delay
   Dmax = 10           # Maximum conduction delay
 
@@ -34,30 +34,24 @@ def Connect2L(N0, N1):
   # Layer 0 (regular spiking)
   r = rn.rand(N0)
   net.layer[0].N = N0
+  net.layer[0].gNa = 120.0*np.ones(N0)
+  net.layer[0].gK = 36.0*np.ones(N0)
+  net.layer[0].gL = 0.3 + (r**2)*np.ones(N0)
+  net.layer[0].ENa = 115.0*np.ones(N0)
+  net.layer[0].EK = -12.0*np.ones(N0)
+  net.layer[0].EL = 0.6 - (r**2)*np.ones(N0)
+
 
   # Layer 1 (regular spiking)
   r = rn.rand(N1)
   net.layer[1].N = N1
+  net.layer[1].gNa = 120.0*np.ones(N1)
+  net.layer[1].gK = 36.0*np.ones(N1)
+  net.layer[1].gL = 0.3 + (r**2)*np.ones(N1)
+  net.layer[1].ENa = 115.0*np.ones(N1)
+  net.layer[1].EK = -12.0*np.ones(N1)
+  net.layer[1].EL = 0.6 - (r**2)*np.ones(N1)
 
-  for i in range(0, 2):
-    net.layer[i].gNa = 555.0 + 445*(r**2)
-    net.layer[i].gK = 21.0 +16*(r**2)
-    net.layer[i].gL = 0.075 +0.275*(r**2)
-    net.layer[i].ENa = 655.5 + 544.5*(r**2)
-    net.layer[i].EK = -6.0 + 8*(r**2)
-    net.layer[i].EL = 92.5 +87.5*(r**2)
-    net.layer[i].C = 2.5 + 2.5*(r**2)
-
-    net.layer[i].Ik = 0.0*np.ones(N0)
-    net.layer[i].m = 0.0*np.ones(N0)
-    net.layer[i].n = 0.0*np.ones(N0)
-    net.layer[i].h = 0.0*np.ones(N0)
-    net.layer[i].alpham = 0.0*np.ones(N0)
-    net.layer[i].alphan = 0.0*np.ones(N0)
-    net.layer[i].alphah = 0.0*np.ones(N0)
-    net.layer[i].betam = 0.0*np.ones(N0)
-    net.layer[i].betan = 0.0*np.ones(N0)
-    net.layer[i].betah = 0.0*np.ones(N0)
 
 
   ## Connectivity matrix (synaptic weights)

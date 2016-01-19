@@ -16,20 +16,18 @@ import matplotlib.pyplot as plt
 N1 = 4
 N2 = 4
 T  = 500  # Simulation time
-Ib = 5    # Base current
+Ib = 15    # Base current
 
 net = Connect2L(N1, N2)
 
 ## Initialise layers
 for lr in xrange(len(net.layer)):
   net.layer[lr].v = -10 * np.ones(net.layer[lr].N)
-  #net.layer[lr].u = 1
   net.layer[lr].firings = np.array([])
 
 v1 = np.zeros([T, N1])
 v2 = np.zeros([T, N2])
-u1 = np.zeros([T, N1])
-u2 = np.zeros([T, N2])
+
 
 ## SIMULATE
 for t in xrange(T):
@@ -73,7 +71,7 @@ plt.xlabel('Time (ms)')
 
 ## Raster plots of firings
 if firings1.size != 0:
-  plt.figure(3)
+  plt.figure(2)
   plt.subplot(211)
   plt.scatter(firings1[:, 0], firings1[:, 1] + 1, marker='.')
   plt.xlim(0, T)

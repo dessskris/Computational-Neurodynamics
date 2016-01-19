@@ -49,7 +49,7 @@ class HHNetwork:
     """
 
     # Euler method step size in ms
-    dt = 0.2
+    dt = 0.01
 
     # Calculate current from incoming spikes
     for j in xrange(self.Nlayers):
@@ -76,21 +76,41 @@ class HHNetwork:
 
     # Update v using the HH model and Euler method
     for k in xrange(int(1/dt)):
-      self.layer[i].alphan = (0.1 - 0.01*self.layer[i].v)/(np.exp(1.0 - 0.1*self.layer[i].v)-1)
-      self.layer[i].alpham = (2.5 - 0.1*self.layer[i].v)/(np.exp(2.5 - 0.1*self.layer[i].v)-1)
-      self.layer[i].alphah = 0.07*np.exp(-self.layer[i].v/20.0)
+      #print self.layer[i].v
+      v = self.layer[i].v
 
-      self.layer[i].betan = 0.125*np.exp(-self.layer[i].v/80.0)
-      self.layer[i].betam = 4.0*np.exp(-self.layer[i].v/18.0)
-      self.layer[i].betah = 1.0/(np.exp(3.0-0.1*self.layer[i].v)+1.0)
+      self.layer[i].alphan = (0.1 - 0.01*v)/(np.exp(1.0 - 0.1*v)-1.0)
+      self.layer[i].alpham = (2.5 - 0.1*v)/(np.exp(2.5 - 0.1*v)-1.0)
+      self.layer[i].alphah = 0.07*np.exp(-v/20.0)
 
-      self.layer[i].m += dt*(self.layer[i].alpham*(1-self.layer[i].m) - self.layer[i].betam*self.layer[i].m)
-      self.layer[i].n += dt*(self.layer[i].alphan*(1-self.layer[i].n) - self.layer[i].betan*self.layer[i].n)
-      self.layer[i].h += dt*(self.layer[i].alphah*(1-self.layer[i].h) - self.layer[i].betah*self.layer[i].h)
+      self.layer[i].betan = 0.125*np.exp(-v/80.0)
+      self.layer[i].betam = 4.0*np.exp(-v/18.0)
+      self.layer[i].betah = 1.0/(np.exp(3.0-0.1*v)+1.0)
 
-      self.layer[i].Ik = self.layer[i].gNa*(self.layer[i].m**3)*self.layer[i].h*(self.layer[i].v-self.layer[i].ENa) + self.layer[i].gK*(self.layer[i].n**4)*(self.layer[i].v-self.layer[i].EK) + self.layer[i].gL*(self.layer[i].v-self.layer[i].EL)
+      an = self.layer[i].alphan
+      am = self.layer[i].alpham
+      ah = self.layer[i].alphah
+      bn = self.layer[i].betan
+      bm = self.layer[i].betam
+      bh = self.layer[i].betah
 
-      self.layer[i].v += dt*(-self.layer[i].Ik + self.layer[i].I)/self.layer[i].C
+      self.layer[i].m += dt*(am*(1.0-self.layer[i].m) - (bm*self.layer[i].m))
+      self.layer[i].n += dt*(an*(1.0-self.layer[i].n) - (bn*self.layer[i].n))
+      self.layer[i].h += dt*(ah*(1.0-self.layer[i].h) - (bh*self.layer[i].h))
+
+      m = self.layer[i].m
+      n = self.layer[i].n
+      h = self.layer[i].h
+
+      gNa = self.layer[i].gNa
+      ENa = self.layer[i].ENa
+      gK = self.layer[i].gK
+      EK = self.layer[i].EK
+      gL = self.layer[i].gL
+      EL = self.layer[i].EL
+
+
+      self.layer[i].v += dt*((-1.0)*(gNa*(m**3.0)*h*(v-ENa) + gK*(n**4)*(v-EK) + gL*(v-EL)) + self.layer[i].I)
 
       # Find index of neurons that have fired this millisecond
       fired = np.where(self.layer[i].v >= 30)[0]
@@ -103,8 +123,6 @@ class HHNetwork:
           else:
             self.layer[i].firings = np.array([[t, f]])
 
-          # Reset the membrane potential after spikes
-          self.layer[i].v[f]  = 0
 
     return
 
@@ -130,7 +148,6 @@ class HHLayer:
     self.EK = np.zeros(n)
     self.EL = np.zeros(n)
     self.C = np.zeros(n)
-    self.Ik = np.zeros(n)
     self.m = np.zeros(n)
     self.n = np.zeros(n)
     self.h = np.zeros(n)
