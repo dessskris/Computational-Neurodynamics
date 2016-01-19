@@ -1,11 +1,9 @@
 """
 Computational Neurodynamics
 Exercise 2
-
 Simulates the movement of a robot with differential wheels under the
 control of a spiking neural network. The simulation runs for a very
 long time --- if you get bored, press Ctrl+C a couple of times.
-
 (C) Murray Shanahan et al, 2015
 """
 
@@ -13,7 +11,7 @@ import numpy as np
 import numpy.random as rn
 import matplotlib.pyplot as plt
 from Environment import Environment
-from RobotConnect4L import RobotConnect4L
+from RobotHHConnect4L import RobotHHConnect4L
 from RobotUpdate import RobotUpdate
 
 
@@ -27,18 +25,19 @@ Env = Environment(15, 10, 20, xmax, ymax)
 print 'Initialising Robot Controller'
 Ns = 4  # Sensor neurons. Try 1, 4, and 8
 Nm = 4  # Motor neurons. Try 1, 4, and 8
-net  = RobotConnect4L(Ns, Nm)
+net  = RobotHHConnect4L(Ns, Nm)
 
 Dmax = 5      # Maximum synaptic delay
 Ib   = 30     # Base current
-Rmax = 40    # Estimated peak motor firing rate in Hz
+Rmax = 40     # Estimated peak motor firing rate in Hz
 Umin = 0.025  # Minimum wheel velocity in cm/ms
-Umax = Umin + Umin/6.0   # Maximum wheel velocity
+Umax = Umin + Umin/6.0  # Maximum wheel velocity
 
 ## Initialise layers
 for lr in xrange(net.Nlayers):
-  net.layer[lr].v = -65 * np.ones(net.layer[lr].N) #10
+  net.layer[lr].v = -65 * np.ones(net.layer[lr].N)  
   net.layer[lr].firings = np.array([])
+ 
 
 # Simulation parameters
 Tmax = 20000  # Simulation time in milliseconds
@@ -47,7 +46,7 @@ dt   = 100    # Robot step size in milliseconds
 # Initialise record of membrane potentials
 v = {}
 for lr in xrange(net.Nlayers):
-  v[lr] = np.zeros([dt, net.layer[lr].N])
+  v[lr] = np.zeros([dt, net.layer[lr].N])   #creates a matrix of dt?? rows and 
 
 
 # Initialise record of robot positions
@@ -107,6 +106,12 @@ for t in xrange(len(T)):
     net.layer[2].I = 5*rn.randn(N2)
     net.layer[3].I = 5*rn.randn(N3)
 
+    """
+    # Deliver noisy base current to inhibitory Neuron populations
+    net.layer[4].I = 5*rn.randn(N2)
+    net.layer[5].I = 5*rn.randn(N3)
+    """
+
     # Update network
     net.Update(t2)
 
@@ -146,30 +151,44 @@ for t in xrange(len(T)):
   plt.figure(1)
   plt.clf()
 
-  plt.subplot(221)
+  plt.subplot(321)
   plt.plot(v[0])
-  plt.subplot(221)
+  plt.subplot(321)
   plt.title('Left sensory neurons')
   plt.ylabel('Membrane potential (mV)')
   plt.ylim(-90, 40)
 
-  plt.subplot(222)
+  plt.subplot(322)
   plt.plot(v[1])
   plt.title('Right sensory neurons')
   plt.ylim(-90, 40)
 
-  plt.subplot(223)
+  plt.subplot(323)
   plt.plot(v[2])
   plt.title('Left motor neurons')
   plt.ylabel('Membrane potential (mV)')
   plt.ylim(-90, 40)
   plt.xlabel('Time (ms)')
 
-  plt.subplot(224)
+  plt.subplot(324)
   plt.plot(v[3])
   plt.title('Right motor neurons')
   plt.ylim(-90, 40)
   plt.xlabel('Time (ms)')
+  
+  """
+  plt.subplot(325)
+  plt.plot(v[4])
+  plt.title('Left inhibitory neurons')
+  plt.ylim(-90, 40)
+  plt.xlabel('Time (ms)')
+
+  plt.subplot(326)
+  plt.plot(v[5])
+  plt.title('Right inhibitory neurons')
+  plt.ylim(-90, 40)
+  plt.xlabel('Time (ms)')
+  """
 
   plt.draw()
 
